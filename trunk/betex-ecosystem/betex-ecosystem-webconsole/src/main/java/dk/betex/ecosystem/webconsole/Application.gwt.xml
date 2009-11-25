@@ -5,6 +5,7 @@
       <inherits name='com.google.gwt.user.User'/>
 
       <!--  inherit css based theme -->
+      <inherits name='com.google.gwt.visualization.Visualization'/>
       <inherits name='com.google.gwt.user.theme.standard.Standard'/>
 
       <!-- Specify the app entry point class.                         -->
