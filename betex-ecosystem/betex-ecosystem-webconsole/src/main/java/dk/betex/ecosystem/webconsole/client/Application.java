@@ -1,19 +1,26 @@
 package dk.betex.ecosystem.webconsole.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.visualizations.PieChart;
 
+import dk.betex.ecosystem.webconsole.client.model.MarketTradedVolume;
+import dk.betex.ecosystem.webconsole.client.model.PriceTradedVolume;
+import dk.betex.ecosystem.webconsole.client.model.RunnerTradedVolume;
+import dk.betex.ecosystem.webconsole.client.service.MarketTradedVolumeService;
+import dk.betex.ecosystem.webconsole.client.service.MarketTradedVolumeServiceAsync;
 import dk.betex.ecosystem.webconsole.client.visualizations.BioHeatMap;
 import dk.betex.ecosystem.webconsole.client.visualizations.BioHeatMap.Options;
 
@@ -26,41 +33,12 @@ public class Application implements EntryPoint {
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
+
 		// Create a callback to be called when the visualization API
 		// has been loaded.
 		Runnable onLoadCallback = new Runnable() {
 			public void run() {
-				Panel panel = RootPanel.get();
-
-				final Options options = BioHeatMap.Options.create();
-				options.setHeight(50);
-				options.setWidth(50);
-				options.setWidth(300);
-				options.setHeight(500);
-				final BioHeatMap bioHeatMap = new BioHeatMap(createTable(), options);
-				panel.add(bioHeatMap);
-
-				final Timer timer = new Timer() {
-
-					@Override
-					public void run() {
-						bioHeatMap.draw(createTable(), options);
-
-					}
-
-				};
-				
-				Button start = new Button("start");
-				panel.add(start);
-				start.addClickListener(new ClickListener() {
-				
-					@Override
-					public void onClick(Widget arg0) {
-						timer.scheduleRepeating(1000/10);
-					}
-				
-				});
-				
+				buildApp();
 			}
 		};
 
@@ -70,18 +48,104 @@ public class Application implements EntryPoint {
 
 	}
 
-	private AbstractDataTable createTable() {
+	private void buildApp() {
+
+		/** Login */
+		final MarketTradedVolumeServiceAsync service = GWT.create(MarketTradedVolumeService.class);
+		service.login("xxx", "xxx", 82, new AsyncCallback<Boolean>() {
+
+			@Override
+			public void onSuccess(Boolean status) {
+				GWT.log("Login status: " + status, null);
+				if (status) {
+
+					/** Get market traded volume. */
+					service.getMarketTradedVolumeForAllPrices(100974906, new AsyncCallback<MarketTradedVolume>() {
+
+						@Override
+						public void onSuccess(MarketTradedVolume marketTradedVolume) {
+							buildMarketTradedVolumeVisualization(marketTradedVolume);
+						}
+
+						@Override
+						public void onFailure(Throwable t) {
+							GWT.log("failed", t);
+							Window.alert("GetMarketTradedVolume failed:" + t.getLocalizedMessage());
+						}
+					});
+
+				} else {
+					Window.alert("Login failed");
+				}
+			}
+
+			@Override
+			public void onFailure(Throwable t) {
+				GWT.log("failed", t);
+				Window.alert("Login failed:" + t.getLocalizedMessage());
+			}
+		});
+
+	}
+
+	private void buildMarketTradedVolumeVisualization(MarketTradedVolume marketTradedVolume) {
+
+		Panel panel = RootPanel.get();
+
+		final Options options = BioHeatMap.Options.create();
+		options.setHeight(50);
+		options.setWidth(50);
+		options.setWidth(300);
+		options.setHeight(500);
+
+		final DataTable dataModel = createDataModel(marketTradedVolume);
+		final BioHeatMap bioHeatMap = new BioHeatMap(dataModel, options);
+		panel.add(bioHeatMap);
+
+		final Timer timer = new Timer() {
+			@Override
+			public void run() {
+
+				for (int priceIndex = 0; priceIndex < dataModel.getNumberOfRows(); priceIndex++) {
+					for (int runnerId = 0; runnerId < dataModel.getNumberOfColumns()-1; runnerId++) {
+						dataModel.setValue(priceIndex, runnerId + 1, Random.nextInt(100));
+					}
+				}
+				bioHeatMap.draw(dataModel, options);
+			}
+		};
+
+		Button start = new Button("Start animation");
+		panel.add(start);
+		start.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				timer.scheduleRepeating(200);
+			}
+		});
+	}
+
+	/**Normalized market traded volume (each runner has list of all betfair prices.*/
+	private DataTable createDataModel(MarketTradedVolume marketTradedVolume) {
+		
 		DataTable data = DataTable.create();
 		data.addColumn(ColumnType.STRING, "Price");
-		for (int runnerId = 0; runnerId < 10; runnerId++) {
-			data.addColumn(ColumnType.NUMBER, "Runner " + runnerId);
+		for (int runnerIndex = 0; runnerIndex < marketTradedVolume.getRunnerTradedVolume().size(); runnerIndex++) {
+			data.addColumn(ColumnType.NUMBER, "r" + runnerIndex);
 		}
-
-		data.addRows(100);
-		for (int price = 0; price < 100; price++) {
-			data.setValue(price, 0, "" + price);
-			for (int runnerId = 0; runnerId < 10; runnerId++) {
-				data.setValue(price, runnerId + 1, Random.nextInt(100));
+		int numOfPrices = marketTradedVolume.getRunnerTradedVolume().get(0).getPriceTradedVolume().size();
+		data.addRows(numOfPrices);
+		for (int priceIndex = 0; priceIndex < numOfPrices; priceIndex++) {
+			double rowPrice = marketTradedVolume.getRunnerTradedVolume().get(0).getPriceTradedVolume().get(priceIndex).getPrice();
+			data.setValue(priceIndex, 0, "" + rowPrice);
+			for (int runnerIndex = 0; runnerIndex < marketTradedVolume.getRunnerTradedVolume().size(); runnerIndex++) {
+				RunnerTradedVolume runnerTradedVolume = marketTradedVolume.getRunnerTradedVolume().get(runnerIndex);
+				 PriceTradedVolume priceTradedVolume = runnerTradedVolume.getPriceTradedVolume().get(priceIndex);
+				 if(priceTradedVolume.getPrice()!=rowPrice) {
+					 throw new IllegalStateException("Data consistency error!. rowPrice != runner price");
+				 }
+				data.setValue(priceIndex, runnerIndex + 1,priceTradedVolume.getTradedVolume());
 			}
 		}
 
