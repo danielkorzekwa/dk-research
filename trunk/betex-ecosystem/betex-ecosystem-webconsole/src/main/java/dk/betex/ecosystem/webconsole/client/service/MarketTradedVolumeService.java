@@ -24,9 +24,18 @@ public interface MarketTradedVolumeService extends RemoteService{
 	public boolean login(String user,String password, int productId);
 	
 	/**Returns traded volume at each price on all of the runners in a particular market
-	 * 
+	 * Prices with 0 traded volume are not returned.
 	 * @param marketId
 	 * @return
 	 */
 	public MarketTradedVolume getMarketTradedVolume(int marketId);
+	
+	/**Returns traded volume at each price on all of the runners in a particular market
+	 * Prices with 0 traded volume are also returned.
+	 * @param marketId
+	 * @return
+	 */
+	public MarketTradedVolume getMarketTradedVolumeForAllPrices(int marketId);
+	
+	
 }
