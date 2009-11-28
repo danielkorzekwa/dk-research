@@ -9,6 +9,7 @@ import dk.betex.ecosystem.webconsole.client.service.MarketTradedVolumeService;
 import dk.bot.betfairservice.BetFairService;
 import dk.bot.betfairservice.DefaultBetFairServiceFactoryBean;
 import dk.bot.betfairservice.model.BFMarketTradedVolume;
+import dk.bot.betfairservice.model.LoginResponse;
 
 /**
  * Returns traded volume at each price on all of the runners in a particular market.
@@ -24,7 +25,7 @@ public class MarketTradedVolumeServiceImpl extends RemoteServiceServlet implemen
 	@Override
 	public void init() throws ServletException {
 
-		DefaultBetFairServiceFactoryBean betfairServiceFactoryBean = new DefaultBetFairServiceFactoryBean();
+		betfairServiceFactoryBean = new DefaultBetFairServiceFactoryBean();
 		try {
 			betfairService = (BetFairService) betfairServiceFactoryBean.getObject();
 		} catch (Exception e) {
@@ -33,11 +34,12 @@ public class MarketTradedVolumeServiceImpl extends RemoteServiceServlet implemen
 	}
 
 	@Override
-	public void login(String user, String password, int productId) {
+	public boolean login(String user, String password, int productId) {
 		betfairServiceFactoryBean.setUser(user);
 		betfairServiceFactoryBean.setPassword(password);
 		betfairServiceFactoryBean.setProductId(productId);
-		betfairServiceFactoryBean.login();
+		LoginResponse loginResponse = betfairServiceFactoryBean.login();
+		return loginResponse.isSuccess();
 	}
 	
 	@Override
