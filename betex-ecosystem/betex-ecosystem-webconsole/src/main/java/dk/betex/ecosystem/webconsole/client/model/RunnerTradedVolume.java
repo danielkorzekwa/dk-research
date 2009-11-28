@@ -1,4 +1,4 @@
-package dk.betex.ecosystem.webconsole.client;
+package dk.betex.ecosystem.webconsole.client.model;
 
 import java.io.Serializable;
 import java.util.List;

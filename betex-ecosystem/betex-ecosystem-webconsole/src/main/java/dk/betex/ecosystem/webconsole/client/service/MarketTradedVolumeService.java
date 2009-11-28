@@ -1,7 +1,9 @@
-package dk.betex.ecosystem.webconsole.client;
+package dk.betex.ecosystem.webconsole.client.service;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+
+import dk.betex.ecosystem.webconsole.client.model.MarketTradedVolume;
 
 /** Returns traded volume at each price on all of the runners in a particular market.
  * 

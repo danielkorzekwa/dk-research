@@ -8,9 +8,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import dk.betex.ecosystem.webconsole.client.MarketTradedVolume;
-import dk.betex.ecosystem.webconsole.client.PriceTradedVolume;
-import dk.betex.ecosystem.webconsole.client.RunnerTradedVolume;
+import dk.betex.ecosystem.webconsole.client.model.MarketTradedVolume;
+import dk.betex.ecosystem.webconsole.client.model.PriceTradedVolume;
+import dk.betex.ecosystem.webconsole.client.model.RunnerTradedVolume;
 import dk.bot.betfairservice.model.BFMarketTradedVolume;
 import dk.bot.betfairservice.model.BFPriceTradedVolume;
 import dk.bot.betfairservice.model.BFRunnerTradedVolume;
