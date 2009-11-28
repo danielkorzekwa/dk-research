@@ -3,6 +3,8 @@ package dk.betex.ecosystem.webconsole.client.model;
 import java.io.Serializable;
 import java.util.List;
 
+import com.betfair.publicapi.types.exchange.v5.RunnerPrices;
+
 /**Represents traded volume at each price on the given runner in a particular market.
  * 
  * @author korzekwad
@@ -10,9 +12,12 @@ import java.util.List;
  */
 public class RunnerTradedVolume implements Serializable{
 
-	private final int selectionId;
-	private final List<PriceTradedVolume> priceTradedVolume;
+	private int selectionId;
+	private List<PriceTradedVolume> priceTradedVolume;
 
+	public RunnerTradedVolume() {
+	}
+	
 	public RunnerTradedVolume(int selectionId, List<PriceTradedVolume> priceTradedVolume) {
 		this.selectionId = selectionId;
 		this.priceTradedVolume = priceTradedVolume;

@@ -14,8 +14,14 @@ import dk.betex.ecosystem.webconsole.client.model.MarketTradedVolume;
 @RemoteServiceRelativePath( "MarketTradedVolume" )
 public interface MarketTradedVolumeService extends RemoteService{
 
-	/**Login to the betfair account.*/
-	public void login(String user,String password, int productId);
+	/**Login to the betfair account.
+	 * 
+	 * @param user
+	 * @param password
+	 * @param productId
+	 * @return true if login successfully, false if not (wrong user/pass/productId)
+	 */
+	public boolean login(String user,String password, int productId);
 	
 	/**Returns traded volume at each price on all of the runners in a particular market
 	 * 

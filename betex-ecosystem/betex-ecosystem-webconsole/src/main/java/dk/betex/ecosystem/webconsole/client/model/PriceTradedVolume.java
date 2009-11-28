@@ -10,9 +10,12 @@ import java.io.Serializable;
  */
 public class PriceTradedVolume implements Serializable{
 
-	private final double price;
-	private final double tradedVolume;
+	private double price;
+	private double tradedVolume;
 
+	public PriceTradedVolume() {
+	}
+	
 	/**
 	 * 
 	 * @param price

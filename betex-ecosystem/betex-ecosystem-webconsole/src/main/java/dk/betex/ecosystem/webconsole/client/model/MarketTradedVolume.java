@@ -10,9 +10,13 @@ import java.util.List;
  */
 public class MarketTradedVolume implements Serializable{
 
-	private final int marketId;
-	private final List<RunnerTradedVolume> runnerTradedVolume;
+	private int marketId;
+	private List<RunnerTradedVolume> runnerTradedVolume;
 
+	public MarketTradedVolume() {
+		
+	}
+	
 	public MarketTradedVolume(int marketId,List<RunnerTradedVolume> runnerTradedVolume) {
 		this.marketId = marketId;
 		this.runnerTradedVolume = runnerTradedVolume;
