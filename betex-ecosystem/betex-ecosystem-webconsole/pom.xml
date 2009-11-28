@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<!--
 		GWT-Maven archetype generated POM
@@ -24,6 +23,11 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>dk.flexibet</groupId>
+			<artifactId>flexibet-betfair</artifactId>
+			<version>0.5-SNAPSHOT</version>
+		</dependency>
 
 		<!--  GWT dependencies (from central repo) -->
 		<dependency>
@@ -79,15 +83,12 @@
 			</plugin>
 			<!--
 				If you want to use the target/web.xml file mergewebxml produces,
-				tell the war plugin to use it.
-				Also, exclude what you want from the final artifact here.
-				<plugin>
+				tell the war plugin to use it. Also, exclude what you want from the
+				final artifact here. <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<configuration>
+				<artifactId>maven-war-plugin</artifactId> <configuration>
 				<webXml>target/web.xml</webXml>
-				<warSourceExcludes>.gwt-tmp/**</warSourceExcludes>
-				</configuration>
+				<warSourceExcludes>.gwt-tmp/**</warSourceExcludes> </configuration>
 				</plugin>
 			-->
 
@@ -102,5 +103,13 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>dk-maven2-repo-snapshots</id>
+			<name>dk-maven2 maven repository (snapshots)</name>
+			<url>http://dk-maven2-repo.googlecode.com/svn/maven-repo/snapshots</url>
+		</repository>
+	</repositories>
 
 </project>
