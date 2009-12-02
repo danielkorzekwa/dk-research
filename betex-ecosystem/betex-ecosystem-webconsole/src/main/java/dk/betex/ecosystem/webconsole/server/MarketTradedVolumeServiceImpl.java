@@ -33,20 +33,21 @@ public class MarketTradedVolumeServiceImpl extends RemoteServiceServlet implemen
 	public void init() throws ServletException {
 
 		betfairServiceFactoryBean = new DefaultBetFairServiceFactoryBean();
+
+		/**Login*/
+		String user = System.getenv("dk.betex.ecosystem.webconsole.bfUser");
+		if(user==null) throw new IllegalStateException("System property is not set: dk.betex.ecosystem.webconsole.bfUser");
+		String pass = System.getenv("dk.betex.ecosystem.webconsole.bfPass");
+		if(pass==null) throw new IllegalStateException("System property is not set: dk.betex.ecosystem.webconsole.bfPass");
+		betfairServiceFactoryBean.setUser(user);
+		betfairServiceFactoryBean.setPassword(pass);
+		betfairServiceFactoryBean.setProductId(82);
+		betfairServiceFactoryBean.login();
 		try {
 			betfairService = (BetFairService) betfairServiceFactoryBean.getObject();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	@Override
-	public boolean login(String user, String password, int productId) {
-		betfairServiceFactoryBean.setUser(user);
-		betfairServiceFactoryBean.setPassword(password);
-		betfairServiceFactoryBean.setProductId(productId);
-		LoginResponse loginResponse = betfairServiceFactoryBean.login();
-		return loginResponse.isSuccess();
 	}
 
 	@Override
