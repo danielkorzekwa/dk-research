@@ -9,8 +9,10 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
@@ -38,53 +40,54 @@ public class Application implements EntryPoint {
 		// has been loaded.
 		Runnable onLoadCallback = new Runnable() {
 			public void run() {
-				buildApp();
+				final MarketTradedVolumeServiceAsync service = GWT.create(MarketTradedVolumeService.class);
+
+				Panel panel = RootPanel.get();
+				final TextBox marketIdTextBox = new TextBox();
+				panel.add(marketIdTextBox);
+				final Button displayMarket = new Button("Display market.");
+				panel.add(displayMarket);
+				final Label statusBar = new Label();
+				panel.add(statusBar);
+				displayMarket.addClickHandler(new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent arg0) {
+						statusBar.setText("Please wait...");
+						
+						int marketId = 0;
+						try {
+							marketId = Integer.parseInt(marketIdTextBox.getValue());
+
+							/** Get market traded volume. */
+							service.getMarketTradedVolumeForAllPrices(marketId,
+									new AsyncCallback<MarketTradedVolume>() {
+
+										@Override
+										public void onSuccess(MarketTradedVolume marketTradedVolume) {
+											buildMarketTradedVolumeVisualization(marketTradedVolume);
+											statusBar.setText("Please wait...DONE");	
+										}
+
+										@Override
+										public void onFailure(Throwable t) {
+											GWT.log("failed", t);
+											Window.alert("GetMarketTradedVolume failed. " + t.getLocalizedMessage());
+										}
+									});
+
+						} catch (NumberFormatException e) {
+							GWT.log("Error parsing marketId", e);
+							Window.alert("Error parsing marketId. " + e.getLocalizedMessage());
+						}
+					}
+				});
 			}
 		};
 
 		// Load the visualization api, passing the onLoadCallback to be called
 		// when loading is done.
 		VisualizationUtils.loadVisualizationApi(onLoadCallback, PieChart.PACKAGE);
-
-	}
-
-	private void buildApp() {
-
-		/** Login */
-		final MarketTradedVolumeServiceAsync service = GWT.create(MarketTradedVolumeService.class);
-		service.login("xxx", "xxx", 82, new AsyncCallback<Boolean>() {
-
-			@Override
-			public void onSuccess(Boolean status) {
-				GWT.log("Login status: " + status, null);
-				if (status) {
-
-					/** Get market traded volume. */
-					service.getMarketTradedVolumeForAllPrices(100974906, new AsyncCallback<MarketTradedVolume>() {
-
-						@Override
-						public void onSuccess(MarketTradedVolume marketTradedVolume) {
-							buildMarketTradedVolumeVisualization(marketTradedVolume);
-						}
-
-						@Override
-						public void onFailure(Throwable t) {
-							GWT.log("failed", t);
-							Window.alert("GetMarketTradedVolume failed:" + t.getLocalizedMessage());
-						}
-					});
-
-				} else {
-					Window.alert("Login failed");
-				}
-			}
-
-			@Override
-			public void onFailure(Throwable t) {
-				GWT.log("failed", t);
-				Window.alert("Login failed:" + t.getLocalizedMessage());
-			}
-		});
 
 	}
 
@@ -107,7 +110,7 @@ public class Application implements EntryPoint {
 			public void run() {
 
 				for (int priceIndex = 0; priceIndex < dataModel.getNumberOfRows(); priceIndex++) {
-					for (int runnerId = 0; runnerId < dataModel.getNumberOfColumns()-1; runnerId++) {
+					for (int runnerId = 0; runnerId < dataModel.getNumberOfColumns() - 1; runnerId++) {
 						dataModel.setValue(priceIndex, runnerId + 1, Random.nextInt(100));
 					}
 				}
@@ -126,9 +129,9 @@ public class Application implements EntryPoint {
 		});
 	}
 
-	/**Normalized market traded volume (each runner has list of all betfair prices.*/
+	/** Normalised market traded volume (each runner has list of all betfair prices. */
 	private DataTable createDataModel(MarketTradedVolume marketTradedVolume) {
-		
+
 		DataTable data = DataTable.create();
 		data.addColumn(ColumnType.STRING, "Price");
 		for (int runnerIndex = 0; runnerIndex < marketTradedVolume.getRunnerTradedVolume().size(); runnerIndex++) {
@@ -137,15 +140,16 @@ public class Application implements EntryPoint {
 		int numOfPrices = marketTradedVolume.getRunnerTradedVolume().get(0).getPriceTradedVolume().size();
 		data.addRows(numOfPrices);
 		for (int priceIndex = 0; priceIndex < numOfPrices; priceIndex++) {
-			double rowPrice = marketTradedVolume.getRunnerTradedVolume().get(0).getPriceTradedVolume().get(priceIndex).getPrice();
+			double rowPrice = marketTradedVolume.getRunnerTradedVolume().get(0).getPriceTradedVolume().get(priceIndex)
+					.getPrice();
 			data.setValue(priceIndex, 0, "" + rowPrice);
 			for (int runnerIndex = 0; runnerIndex < marketTradedVolume.getRunnerTradedVolume().size(); runnerIndex++) {
 				RunnerTradedVolume runnerTradedVolume = marketTradedVolume.getRunnerTradedVolume().get(runnerIndex);
-				 PriceTradedVolume priceTradedVolume = runnerTradedVolume.getPriceTradedVolume().get(priceIndex);
-				 if(priceTradedVolume.getPrice()!=rowPrice) {
-					 throw new IllegalStateException("Data consistency error!. rowPrice != runner price");
-				 }
-				data.setValue(priceIndex, runnerIndex + 1,priceTradedVolume.getTradedVolume());
+				PriceTradedVolume priceTradedVolume = runnerTradedVolume.getPriceTradedVolume().get(priceIndex);
+				if (priceTradedVolume.getPrice() != rowPrice) {
+					throw new IllegalStateException("Data consistency error!. rowPrice != runner price");
+				}
+				data.setValue(priceIndex, runnerIndex + 1, priceTradedVolume.getTradedVolume());
 			}
 		}
 
