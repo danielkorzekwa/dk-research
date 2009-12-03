@@ -64,7 +64,7 @@ public class MarketTradedVolumeServiceImpl extends RemoteServiceServlet implemen
 		MarketTradedVolume marketTradedVolume = MarketTradedVolumeFactory.create(bfMarketTradedVolume);
 
 		MarketTradedVolume normalizedMarketTradedVolume = MarketTradedVolumeFactory
-				.createNormalized(marketTradedVolume);
+				.createNormalizedAsProbs(marketTradedVolume);
 		return normalizedMarketTradedVolume;
 	}
 

@@ -30,12 +30,12 @@ public class BioHeatMap extends Visualization<BioHeatMap.Options> {
 		protected Options() {
 		}
 
-		public final native void setCellWidth(int width) /*-{
-		      this.width = width;
+		public final native void setCellWidth(int cellWidth) /*-{
+		      this.cellWidth = cellWidth;
 		    }-*/;
 		
-		public final native void setCellHeight(int height) /*-{
-	      this.height = height;
+		public final native void setCellHeight(int cellHeight) /*-{
+	      this.cellHeight = cellHeight;
 	    }-*/;
 	}
 	

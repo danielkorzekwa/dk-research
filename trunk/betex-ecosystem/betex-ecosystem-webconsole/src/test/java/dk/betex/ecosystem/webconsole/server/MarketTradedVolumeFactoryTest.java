@@ -105,4 +105,46 @@ public class MarketTradedVolumeFactoryTest {
 			}
 		}
 	}
+	
+	@Test
+	public void testCreateNormalizedProbs() {
+		MarketTradedVolume marketTradedVolume = MarketTradedVolumeFactory.create(bfMarketTradedVolume);
+		MarketTradedVolume normalizedMarketTradedVolume = MarketTradedVolumeFactory
+				.createNormalizedAsProbs(marketTradedVolume);
+
+		assertEquals(marketTradedVolume.getMarketId(), normalizedMarketTradedVolume.getMarketId());
+
+		assertEquals(marketTradedVolume.getRunnerTradedVolume().size(), normalizedMarketTradedVolume
+				.getRunnerTradedVolume().size());
+
+		for (int runnerIndex = 0; runnerIndex < marketTradedVolume.getRunnerTradedVolume().size(); runnerIndex++) {
+			RunnerTradedVolume runnerTradedVolume = marketTradedVolume.getRunnerTradedVolume().get(runnerIndex);
+			RunnerTradedVolume normalizedRunnerTradedVolume = normalizedMarketTradedVolume.getRunnerTradedVolume().get(
+					runnerIndex);
+
+			assertEquals(runnerTradedVolume.getSelectionId(), normalizedRunnerTradedVolume.getSelectionId());
+			assertEquals(101, normalizedRunnerTradedVolume.getPriceTradedVolume().size());
+
+			for (int priceIndex = 0; priceIndex < normalizedRunnerTradedVolume.getPriceTradedVolume().size(); priceIndex++) {
+				PriceTradedVolume normalizedPriceTradedVolume = normalizedRunnerTradedVolume.getPriceTradedVolume()
+						.get(priceIndex);
+
+				if (runnerTradedVolume.getSelectionId() == 105 && normalizedPriceTradedVolume.getPrice() == 47) {
+					assertEquals(35.32, normalizedPriceTradedVolume.getTradedVolume(), 0);
+				}
+				else if (runnerTradedVolume.getSelectionId() == 105 && normalizedPriceTradedVolume.getPrice() == 45) {
+					assertEquals(765.56, normalizedPriceTradedVolume.getTradedVolume(), 0);
+				}
+				else if (runnerTradedVolume.getSelectionId() == 106 && normalizedPriceTradedVolume.getPrice() == 29) {
+					assertEquals(43.24, normalizedPriceTradedVolume.getTradedVolume(), 0);
+				}
+				else if (runnerTradedVolume.getSelectionId() == 106 && normalizedPriceTradedVolume.getPrice() == 27) {
+					assertEquals(65.12, normalizedPriceTradedVolume.getTradedVolume(), 0);
+				}
+				else {
+					assertEquals(0, normalizedPriceTradedVolume.getTradedVolume(), 0);
+				}
+			}
+		}
+	}
 }

@@ -96,10 +96,8 @@ public class Application implements EntryPoint {
 		Panel panel = RootPanel.get();
 
 		final Options options = BioHeatMap.Options.create();
-		options.setHeight(50);
-		options.setWidth(50);
-		options.setWidth(300);
-		options.setHeight(500);
+		options.setCellWidth(15);
+		options.setCellHeight(2);
 
 		final DataTable dataModel = createDataModel(marketTradedVolume);
 		final BioHeatMap bioHeatMap = new BioHeatMap(dataModel, options);

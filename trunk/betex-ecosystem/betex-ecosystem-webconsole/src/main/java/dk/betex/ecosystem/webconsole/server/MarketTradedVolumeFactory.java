@@ -40,37 +40,85 @@ public class MarketTradedVolumeFactory {
 				runnerTradedVolume);
 		return marketTradedVolume;
 	}
-	
-	/**Add missing prices for all runners, so every runner has the same number of all possible betfair prices. Missing prices will be added with 0 traded volume. 
+
+	/**
+	 * Returns market traded volume for all valid betfair prices.
 	 * 
 	 * @param marketTradedVolume
+	 *            contains only runner prices with traded volume bigger than 0.
 	 * @return
 	 */
 	public static MarketTradedVolume createNormalized(MarketTradedVolume marketTradedVolume) {
-	List<Double> allPrices = BetFairUtil.getAllPricesForPriceRanges(BetFairUtil.getPriceRanges());
-	
-		/**Add prices with 0 traded volume for all runners.*/
+		List<Double> allPrices = BetFairUtil.getAllPricesForPriceRanges(BetFairUtil.getPriceRanges());
+
 		List<RunnerTradedVolume> normalizedRunnerTradedVolume = new ArrayList<RunnerTradedVolume>();
-		for(RunnerTradedVolume runnerTradedVolume: marketTradedVolume.getRunnerTradedVolume()) {
-			
-			/**key - price, value - traded volume*/
-			Map<Double,Double> pricesTradedVolumeMap = new HashMap<Double, Double>();
-			for(PriceTradedVolume priceTradedVolume: runnerTradedVolume.getPriceTradedVolume()) {
+		for (RunnerTradedVolume runnerTradedVolume : marketTradedVolume.getRunnerTradedVolume()) {
+
+			/** key - price, value - traded volume */
+			Map<Double, Double> pricesTradedVolumeMap = new HashMap<Double, Double>();
+			for (PriceTradedVolume priceTradedVolume : runnerTradedVolume.getPriceTradedVolume()) {
 				pricesTradedVolumeMap.put(priceTradedVolume.getPrice(), priceTradedVolume.getTradedVolume());
 			}
-			
+
 			List<PriceTradedVolume> normalizedPriceTradedVolume = new ArrayList<PriceTradedVolume>();
-			for(Double price: allPrices) {
+			for (Double price : allPrices) {
 				Double tradedVolume = pricesTradedVolumeMap.get(price);
-				if(tradedVolume==null) {tradedVolume=0d;}
-				normalizedPriceTradedVolume.add(new PriceTradedVolume(price,tradedVolume));	
+				if (tradedVolume == null) {
+					tradedVolume = 0d;
+				}
+				normalizedPriceTradedVolume.add(new PriceTradedVolume(price, tradedVolume));
 			}
-			
-			normalizedRunnerTradedVolume.add(new RunnerTradedVolume(runnerTradedVolume.getSelectionId(), normalizedPriceTradedVolume));
+
+			normalizedRunnerTradedVolume.add(new RunnerTradedVolume(runnerTradedVolume.getSelectionId(),
+					normalizedPriceTradedVolume));
 		}
-		
-		MarketTradedVolume normalizedMarketTradedVolume = new MarketTradedVolume(marketTradedVolume.getMarketId(), normalizedRunnerTradedVolume);
+
+		MarketTradedVolume normalizedMarketTradedVolume = new MarketTradedVolume(marketTradedVolume.getMarketId(),
+				normalizedRunnerTradedVolume);
 		return normalizedMarketTradedVolume;
-		
 	}
+
+	/**
+	 * Returns market traded volume for probabilities 0,1,2...100.
+	 * 
+	 * @param marketTradedVolume
+	 *            contains only runner prices with traded volume bigger than 0.
+	 * @return
+	 */
+	public static MarketTradedVolume createNormalizedAsProbs(MarketTradedVolume marketTradedVolume) {
+
+		List<Integer> allProbabilities = new ArrayList<Integer>();
+		for (int i = 0; i <= 100; i++) {
+			allProbabilities.add(i);
+		}
+
+		List<RunnerTradedVolume> normalizedRunnerTradedVolume = new ArrayList<RunnerTradedVolume>();
+		for (RunnerTradedVolume runnerTradedVolume : marketTradedVolume.getRunnerTradedVolume()) {
+
+			/** key - probability from 0..100, value - traded volume */
+			Map<Integer, Double> pricesTradedVolumeMap = new HashMap<Integer, Double>();
+			for (PriceTradedVolume priceTradedVolume : runnerTradedVolume.getPriceTradedVolume()) {
+				int prob = (int)((1/priceTradedVolume.getPrice())*100);
+				pricesTradedVolumeMap.put(prob, priceTradedVolume.getTradedVolume());
+			}
+
+			List<PriceTradedVolume> normalizedPriceTradedVolume = new ArrayList<PriceTradedVolume>();
+			for (int prob : allProbabilities) {
+				Double tradedVolume = pricesTradedVolumeMap.get(prob);
+				if (tradedVolume == null) {
+					tradedVolume = 0d;
+				}
+				
+				normalizedPriceTradedVolume.add(new PriceTradedVolume(prob, tradedVolume));
+			}
+
+			normalizedRunnerTradedVolume.add(new RunnerTradedVolume(runnerTradedVolume.getSelectionId(),
+					normalizedPriceTradedVolume));
+		}
+
+		MarketTradedVolume normalizedMarketTradedVolume = new MarketTradedVolume(marketTradedVolume.getMarketId(),
+				normalizedRunnerTradedVolume);
+		return normalizedMarketTradedVolume;
+	}
+
 }
