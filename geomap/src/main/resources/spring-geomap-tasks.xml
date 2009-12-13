@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+	  http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<context:annotation-config />
+	
+	
+	<!--  Update BetFair Total matched -->
+	<bean id="bfUpdateTotalMatchedTask" class="dk.geomap.updatetotalmatched.BFUpdateTotalMatched">
+		<constructor-arg ref="betfair" />
+		<constructor-arg ref="marketDao" />
+		<constructor-arg ref="totalMatchedDao" />
+	</bean>
+	<bean id="bfUpdateTotalMatchedJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="bfUpdateTotalMatchedTask" />
+		<property name="targetMethod" value="update" />
+		<property name="concurrent" value="false" />
+	</bean>
+	<bean id="bfUpdateTotalMatchedTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+		<property name="jobDetail" ref="bfUpdateTotalMatchedJob" />
+    	<!-- 1 seconds -->
+		<property name="startDelay" value="1000" />
+    	<!-- repeat every 1 min -->
+		<property name="repeatInterval" value="60000" />
+	</bean>
+	
+	<!--  Update BetDaq Total matched -->
+	<bean id="bdUpdateTotalMatchedTask" class="dk.geomap.updatetotalmatched.BDUpdateTotalMatched">
+		<constructor-arg ref="betDaq" />
+		<constructor-arg ref="marketDao" />
+		<constructor-arg ref="totalMatchedDao" />
+	</bean>
+	<bean id="bdUpdateTotalMatchedJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="bdUpdateTotalMatchedTask" />
+		<property name="targetMethod" value="update" />
+		<property name="concurrent" value="false" />
+	</bean>
+	<bean id="bdUpdateTotalMatchedTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+		<property name="jobDetail" ref="bdUpdateTotalMatchedJob" />
+    	<!-- 1 seconds -->
+		<property name="startDelay" value="1000" />
+    	<!-- repeat every 1 min -->
+		<property name="repeatInterval" value="60000" />
+	</bean>
+	
+	<!--  Quartz Factory -->
+	<bean id="geomapScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="bfUpdateTotalMatchedTrigger" />
+				<ref bean="bdUpdateTotalMatchedTrigger" />
+			</list>
+		</property>
+	</bean>
+</beans>

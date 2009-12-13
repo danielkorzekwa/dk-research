@@ -1,0 +1,29 @@
+<html>
+<head>
+  <script type='text/javascript' src='http://www.google.com/jsapi'></script>
+  <script type='text/javascript'>
+   google.load('visualization', '1', {'packages': ['geomap']});
+   google.setOnLoadCallback(drawMap);
+
+    function drawMap() {
+      var rawdata = $rawdata
+      var data = new google.visualization.DataTable(rawdata.table);
+     
+      var options = {};
+      options['dataMode'] = 'regions';
+      options['width'] = '834px';
+      options['height'] = '520px';
+
+      var container = document.getElementById('map_canvas');
+      var geomap = new google.visualization.GeoMap(container);
+      geomap.draw(data, options);
+  };
+  </script>
+</head>
+
+<body>
+Total matched for BetFair markets started from: $fromDate to: $toDate
+  <div id='map_canvas'></div>
+</body>
+
+</html>

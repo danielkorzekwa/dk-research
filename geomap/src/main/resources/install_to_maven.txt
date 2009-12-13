@@ -1,0 +1,1 @@
+mvn install:install-file -Dfile=visualization-datasource-1.0.jar -DgroupId=visualization-datasource -DartifactId=visualization-datasource -Dversion=1.0 -Dpackaging=jar
